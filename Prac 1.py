@@ -14,35 +14,39 @@ import RPi.GPIO as GPIO
 import time
 status=1
 import itertools
+counter=0
 chan_list=(26,6,5)
-# Logic that you write
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(6,GPIO.OUT,initial=GPIO.LOW)
+GPIO.setup(5,GPIO.OUT,initial=GPIO.LOW)
+GPIO.setup(26,GPIO.OUT,initial=GPIO.LOW) 
+GPIO.setup(23,GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(24,GPIO.IN, pull_up_down=GPIO.PUD_UP)
+B=itertools.product([0,1], repeat=3)
 def main():
-   
-   GPIO.setmode(GPIO.BCM)
-   GPIO.setup(6,GPIO.OUT,initial=GPIO.LOW)
-   GPIO.setup(5,GPIO.OUT,initial=GPIO.LOW)
-   GPIO.setup(26,GPIO.OUT,initial=GPIO.LOW) 
-   GPIO.setup(23,GPIO.IN, pull_up_down=GPIO.PUD_UP)
-   GPIO.setup(24,GPIO.IN, pull_up_down=GPIO.PUD_UP)
-  # for x in range (10):
-   #   GPIO.output(chan_list, 1)
-    #  time.sleep(1)
-     # GPIO.output(chan_list, 0)
-   B=itertools.product([0,1], repeat=3)
-   for i in itertools.product([0,1], repeat=3):
+   for i in itertools.product([1,0], repeat=3):
        GPIO.output(chan_list, i)
        time.sleep(1)
-       
-           
+               
 def swLed(ev=None):
     
     global status
     status = not status
     GPIO.output(chan_list, status)  # switch led status(on-->off; off-->on)
 
-def loop():
+def button_up():
+    global counter
+    GPIO.add_event_detect(24, GPIO.FALLING, callback=swLed, bouncetime=200)
+    counter=counter+1
+    GPIO.output(chan_list, *B[counter])
+    while True:
+        time.sleep(1)
     
+def button_down():
+    global counter
     GPIO.add_event_detect(23, GPIO.FALLING, callback=swLed, bouncetime=200) # wait for falling and set bouncetime to prevent the callback function from being called multiple times when the button is pressed
+    counter=counter-1
+    GPIO.output(chan_list, B[counter])
     while True:
         time.sleep(1)   # Don't do anything
 
@@ -51,7 +55,7 @@ if __name__ == "__main__":
     #main()
     try:
         while True:
-            main()
+            button_up()
     except KeyboardInterrupt:
         print("Exiting gracefully")
         # Turn off your GPIOs here
