@@ -1,8 +1,5 @@
 #!/usr/bin/python3
 """
-Python Practical Template
-Keegan Crankshaw
-Readjust this Docstring as follows:
 Ashay Makanjee
 Student Number: MKNASH006
 Prac: 1
@@ -31,13 +28,21 @@ def main(ev=None):
         
 def button_up(ev=None):
     global counter
-    counter=counter+1
+    if (counter==7):
+        counter=0
+    else:
+        counter=counter+1
+    
     GPIO.output(chan_list, B[counter])
     
     
 def button_down(ev=None):
     global counter
-    counter=counter-1
+    if (counter==0):
+        counter=7
+    else:
+        counter=counter-1
+    
     GPIO.output(chan_list, B[counter])
        
 
